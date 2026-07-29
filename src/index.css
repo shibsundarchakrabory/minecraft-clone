@@ -1,0 +1,64 @@
+:root {
+
+  /* * background Colors */
+  --primary-bg-color: #000000;
+  --secondary-bg-color: #212121;
+  --active-bg-color: #ffffff;
+  --danger-bg-color: #ff8a8a;
+  --success-bg-color: #8aff94;
+
+  /* * text-Color */
+  --primery-text-color: #3a3a3a;
+  /* --primery-text-color: #000; */
+  --secondary-text-color: #CCCCCC;
+  --tertiary-text-color: #B2B2B2;
+  --active-text-color: #212121;
+
+  /** padding variables */
+  --padding-xs: 4px;
+  --padding-sm: 8px;
+  --padding-md: 16px;
+  --padding-lg: 24px;
+  --padding-xl: 32px;
+  --padding-2xl: 40px;
+  --padding-3xl: 48px;
+
+  /** margin variables */
+  --margin-xs: 4px;
+  --margin-sm: 8px;
+  --margin-md: 16px;
+  --margin-lg: 24px;
+  --margin-xl: 32px;
+  --margin-2xl: 40px;
+  --margin-3xl: 48px;
+
+  /* *border colors */
+  --border-primery: #212121;
+  --border-radius-xs: 4px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
+  --border-radius-2xl: 24px;
+  --border-radius-50-Pencent: 50%;
+
+  /* * gutter */
+  --gutter-xs: 4px;
+  --gutter-sm: 8px;
+  --gutter-md: 16px;
+  --gutter-lg: 24px;
+  --gutter-xl: 32px;
+  --gutter-2xl: 40px;
+  --gutter-3xl: 48px;
+
+  /* *fontSize */
+  --fontSize-xs: 4px;
+  --fontSize-sm: 8px;
+  --fontSize-md: 16px;
+  --fontSize-lg: 24px;
+  --fontSize-xl: 32px;
+  --fontSize-2xl: 40px;
+  --fontSize-3xl: 48px;
+  --fontSize-4xl: 10rem;
+
+}
