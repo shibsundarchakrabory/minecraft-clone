@@ -8,6 +8,8 @@ export default function createUI(world) {
 
     gui.add(world.size, 'height', 1, 32, 1).name('Height')
 
+    
+
     gui.onChange(() => {
         world.generate();
     })

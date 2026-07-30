@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { SimplexNoise } from "three/examples/jsm/Addons.js";
 
 export class World extends THREE.Group {
     /**
@@ -10,6 +11,16 @@ export class World extends THREE.Group {
      */
     data = [];
 
+    // threshold = 0.5; // Threshold for block generation (0..1)
+
+    parameters = {
+        terrain: {
+            scale: 30, // Scale of the noise
+            magnitude: 0.5, // Magnitude of the noise
+            offset: 0.2, // Offset for the noise
+        },
+    };
+
     constructor(size = { width: 64, height: 32 }) {
         super();
         this.size = size;
@@ -17,16 +28,16 @@ export class World extends THREE.Group {
         this.material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
     }
 
-    genarate() {
-        this.generate();
-    }
-
     generate() {
-        this.genarateTerrain();
+        this.initializeTerrain();
+        this.generateTerrain();
         this.generateMeshes();
     }
 
-    genarateTerrain() {
+    /**
+     * initialize the terrain data
+     * */
+    initializeTerrain() {
         this.data = []; // Clear previous data
         for (let x = 0; x < this.size.width; x++) {
             // Loop through width
@@ -38,13 +49,41 @@ export class World extends THREE.Group {
                     // Loop through depth
                     row.push({
                         // Placeholder for block data
-                        id: 1,
-                        instanceId: 0,
+                        id: 0,
+                        instanceId: null,
                     });
                 }
                 slice.push(row);
             }
             this.data.push(slice);
+        }
+    }
+
+    generateTerrain() {
+        const simplex = new SimplexNoise();
+        for (let x = 0; x < this.size.width; x++) {
+            for (let z = 0; z < this.size.width; z++) {
+                // Generate a height value using Simplex noise
+                const value = simplex.noise(
+                    x / this.parameters.terrain.scale,
+                    z / this.parameters.terrain.scale
+                );
+
+                const scaledNoise =
+                    this.parameters.terrain.offset +
+                    this.parameters.terrain.magnitude * value;
+
+                let height = Math.floor(this.size.height * scaledNoise);
+
+                height = Math.max(
+                    0,
+                    Math.min(this.size.height - 1, height)
+                ); // Clamp height to valid range
+
+                for (let y = 0; y <= height; y++) {
+                    this.setBlockId(x, y, z, 1); // Set block ID to 1 for solid
+                }
+            }
         }
     }
 
@@ -86,10 +125,6 @@ export class World extends THREE.Group {
         }
         this.add(mesh);
     }
-
-    // genarateWorld() {
-    //     this.generate();
-    // }
 
     inBounds(x, y, z) {
         if (

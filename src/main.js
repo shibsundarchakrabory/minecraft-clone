@@ -4,16 +4,14 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./engine/world/world";
 import createUI from "./ui/ui";
 
-
-const  stats = new Stats();
+const stats = new Stats();
 document.body.appendChild(stats.dom);
-
 
 // Renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x88a0e0)
+renderer.setClearColor(0x88a0e0);
 document.body.appendChild(renderer.domElement);
 
 // Camera
@@ -34,6 +32,19 @@ const scene = new THREE.Scene();
 const world = new World();
 world.generate();
 scene.add(world);
+
+camera.position.set(
+    world.size.width * 0.75,
+    world.size.height * 1.25,
+    world.size.width * 0.75
+);
+controls.target.set(
+    world.size.width / 2,
+    world.size.height / 2,
+    world.size.width / 2
+);
+controls.update();
+
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
@@ -51,7 +62,7 @@ function setupLight() {
 }
 
 // function setupWorld(size) {
-    
+
 // }
 
 // Rendering loop
@@ -59,7 +70,7 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update(); // Required for damping or auto-rotation
     renderer.render(scene, camera);
-    stats.update()
+    stats.update();
 }
 
 window.addEventListener("resize", () => {
