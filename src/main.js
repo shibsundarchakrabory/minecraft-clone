@@ -1,6 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./engine/world/world";
+import createUI from "./ui/ui";
+
+
+const  stats = new Stats();
+document.body.appendChild(stats.dom);
+
 
 // Renderer
 const renderer = new THREE.WebGLRenderer();
@@ -25,7 +32,7 @@ controls.update();
 // Scene
 const scene = new THREE.Scene();
 const world = new World();
-world.genarateWorld();
+world.generate();
 scene.add(world);
 const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
@@ -52,6 +59,7 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update(); // Required for damping or auto-rotation
     renderer.render(scene, camera);
+    stats.update()
 }
 
 window.addEventListener("resize", () => {
@@ -62,4 +70,5 @@ window.addEventListener("resize", () => {
 
 setupLight();
 // setupWorld(8); // Reduced size so cubes fit nicely in view
+createUI(world);
 animate();
