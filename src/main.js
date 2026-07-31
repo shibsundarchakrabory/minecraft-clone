@@ -12,6 +12,8 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x88a0e0);
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 document.body.appendChild(renderer.domElement);
 
 // Camera
@@ -49,15 +51,33 @@ const geometry = new THREE.BoxGeometry();
 const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
 function setupLight() {
-    const light1 = new THREE.DirectionalLight(0xffffff, 1);
-    light1.position.set(1, 1, 1);
-    scene.add(light1);
+    const sun = new THREE.DirectionalLight(0xffffff, 1);
 
-    const light2 = new THREE.DirectionalLight(0xffffff, 1);
-    light2.position.set(-1, -1, -0.5);
-    scene.add(light2);
+    sun.position.set(50, 50, 50);
+    sun.castShadow = true;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Shadow map quality
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+
+    // Shadow camera box
+    sun.shadow.camera.left = -50;
+    sun.shadow.camera.right = 50;
+    sun.shadow.camera.top = 50;
+    sun.shadow.camera.bottom = -50;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 150;
+    sun.shadow.bias = -0.0005
+
+    sun.shadow.mapSize = new THREE.Vector2(512, 512)
+
+    scene.add(sun);
+
+    // Visualize the shadow camera
+    const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
+    scene.add(shadowHelper);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
 }
 
