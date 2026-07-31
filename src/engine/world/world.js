@@ -32,8 +32,10 @@ export class World extends THREE.Group {
     }
 
     generate() {
+        const rng = new RNG(this.seed);
         this.initializeTerrain();
-        this.generateTerrain();
+        this.generateTerrain(rng);
+        this.generateResources(rng);
         this.generateMeshes();
     }
 
@@ -62,8 +64,33 @@ export class World extends THREE.Group {
         }
     }
 
-    generateTerrain() {
-        const rng = new RNG(this.seed);
+    generateResources(rng) {
+        const simplex = new SimplexNoise();
+        const scale = this.parameters.terrain.scale;
+
+        for (let x = 0; x < this.size.width; x++) {
+            for (let y = 0; y < this.size.height; y++) {
+                for (let z = 0; z < this.size.width; z++) {
+                    const currentBlockId = this.getBlock(x, y, z)?.id ?? blocks.empty.id;
+
+                    if (currentBlockId !== blocks.empty.id && currentBlockId !== blocks.grass.id) {
+                        const value = simplex.noise3d(
+                            x / scale,
+                            y / scale,
+                            z / scale
+                        );
+
+                        if (value > blocks.stone.scarcity) {
+                            this.setBlockId(x, y, z, blocks.stone.id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    generateTerrain(rng) {
+        // const rng = new RNG(this.seed);
         const simplex = new SimplexNoise();
 
         for (let x = 0; x < this.size.width; x++) {
@@ -83,11 +110,11 @@ export class World extends THREE.Group {
                 height = Math.max(0, Math.min(this.size.height - 1, height)); // Clamp height to valid range
 
                 for (let y = 0; y < this.size.height; y++) {
-                    if (y < height) {
+                    if (y < height && this.getBlock(x, y, z).id === blocks.empty.id) {
                         this.setBlockId(x, y, z, blocks.dirt.id);
                     } else if (y === height) {
                         this.setBlockId(x, y, z, blocks.grass.id);
-                    } else {
+                    } else if (y > height) {
                         this.setBlockId(x, y, z, blocks.empty.id);
                     }
                 }
@@ -116,7 +143,10 @@ export class World extends THREE.Group {
                     );
                     const instanceId = mesh.count; // Get the current instance ID before incrementing
 
-                    if (blockId !== blocks.empty.id && !this.isBlockObscured(x, y, z)) {
+                    if (
+                        blockId !== blocks.empty.id &&
+                        !this.isBlockObscured(x, y, z)
+                    ) {
                         matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
                         mesh.setMatrixAt(instanceId, matrix);
                         mesh.setColorAt(

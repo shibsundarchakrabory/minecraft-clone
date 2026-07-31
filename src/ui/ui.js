@@ -1,4 +1,7 @@
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
+import {blocks} from "../engine/blocks/blocks.js";
+
+
 
 export default function createUI(world) {
     const gui = new GUI();
@@ -8,11 +11,21 @@ export default function createUI(world) {
     gui.add(world.size, "height", 1, 32, 1).name("Height");
 
     const terrainFolder = gui.addFolder("Terrain");
-
     terrainFolder.add(world.parameters, "seed", 1, 10000).name("seed");
     terrainFolder.add(world.parameters.terrain, "scale", 10, 100).name("scale");
     terrainFolder.add(world.parameters.terrain, "magnitude", 0, 1).name("magnitude");
     terrainFolder.add(world.parameters.terrain, "offset", 0, 1).name("offset");
+
+
+    const resourcesFolder = gui.addFolder("Resources");
+    resourcesFolder.add(blocks.stone, "scarcity", 0, 1).name("Stone Scarcity");
+
+
+    const scaleFolder = resourcesFolder.addFolder("Scale");
+    scaleFolder.add(blocks.stone.scale, "x", 1, 100).name("Stone Scale X");
+    scaleFolder.add(blocks.stone.scale, "y", 1, 100).name("Stone Scale Y");
+    scaleFolder.add(blocks.stone.scale, "z", 1, 100).name("Stone Scale Z");
+
 
     gui.onChange(() => {
         world.generate();
