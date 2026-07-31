@@ -3,7 +3,7 @@ import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
 export default function createUI(world) {
     const gui = new GUI();
 
-    gui.add(world.size, "width", 1, 64, 1).name("Width");
+    gui.add(world.size, "width", 1, 100, 1).name("Width");
 
     gui.add(world.size, "height", 1, 32, 1).name("Height");
 

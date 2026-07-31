@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
-import RNG from "./rng"
-import {blocks} from "../blocks/blocks.js";
-
+import RNG from "./rng";
+import { blocks } from "../blocks/blocks.js";
 
 export class World extends THREE.Group {
     /**
@@ -17,7 +16,7 @@ export class World extends THREE.Group {
     // threshold = 0.5; // Threshold for block generation (0..1)
 
     parameters = {
-        seed:0,
+        seed: 0,
         terrain: {
             scale: 30, // Scale of the noise
             magnitude: 0.5, // Magnitude of the noise
@@ -64,7 +63,6 @@ export class World extends THREE.Group {
     }
 
     generateTerrain() {
-
         const rng = new RNG(this.seed);
         const simplex = new SimplexNoise();
 
@@ -82,20 +80,16 @@ export class World extends THREE.Group {
 
                 let height = Math.floor(this.size.height * scaledNoise);
 
-                height = Math.max(
-                    0,
-                    Math.min(this.size.height - 1, height)
-                ); // Clamp height to valid range
+                height = Math.max(0, Math.min(this.size.height - 1, height)); // Clamp height to valid range
 
-                for (let y = 0; y <= this.size.height; y++) {
-                    if (y <= height) {
+                for (let y = 0; y < this.size.height; y++) {
+                    if (y < height) {
                         this.setBlockId(x, y, z, blocks.dirt.id);
-                    } else if (y === height + 1) {
+                    } else if (y === height) {
                         this.setBlockId(x, y, z, blocks.grass.id);
-                    }else {
+                    } else {
                         this.setBlockId(x, y, z, blocks.empty.id);
                     }
-
                 }
             }
         }
@@ -117,13 +111,18 @@ export class World extends THREE.Group {
             for (let y = 0; y < this.size.height; y++) {
                 for (let z = 0; z < this.size.width; z++) {
                     const blockId = this.getBlock(x, y, z).id;
-                    const blockType = Object.values(blocks).find(x => x.id === blockId);
+                    const blockType = Object.values(blocks).find(
+                        (x) => x.id === blockId
+                    );
                     const instanceId = mesh.count; // Get the current instance ID before incrementing
 
-                    if (blockId !== 0) {
+                    if (blockId !== blocks.empty.id && !this.isBlockObscured(x, y, z)) {
                         matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
                         mesh.setMatrixAt(instanceId, matrix);
-                        mesh.setColorAt(instanceId, new THREE.Color(blockType.color));
+                        mesh.setColorAt(
+                            instanceId,
+                            new THREE.Color(blockType.color)
+                        );
                         this.setBlockInstanceId(x, y, z, instanceId);
                         mesh.count++; // Increment the count only when a block is added
                     }
@@ -202,5 +201,48 @@ export class World extends THREE.Group {
         if (this.inBounds(x, y, z)) {
             this.data[x][y][z].instanceId = instanceId;
         }
+    }
+
+    isBlockObscured(x, y, z) {
+        const up = this.getBlock(x, y + 1, z)?.id ?? blocks.empty.id;
+        const down = this.getBlock(x, y - 1, z)?.id ?? blocks.empty.id;
+        const left = this.getBlock(x - 1, y, z)?.id ?? blocks.empty.id;
+        const right = this.getBlock(x + 1, y, z)?.id ?? blocks.empty.id;
+        const front = this.getBlock(x, y, z + 1)?.id ?? blocks.empty.id;
+        const back = this.getBlock(x, y, z - 1)?.id ?? blocks.empty.id;
+
+        // if any of the adjacent blocks are not empty, then the block is obscured
+        if (
+            up === blocks.empty.id ||
+            down === blocks.empty.id ||
+            left === blocks.empty.id ||
+            right === blocks.empty.id ||
+            front === blocks.empty.id ||
+            back === blocks.empty.id
+        ) {
+            return false;
+        } else {
+            return true;
+        }
+
+        // const directions = [
+        //     [1, 0, 0], // right
+        //     [-1, 0, 0], // left
+        //     [0, 1, 0], // up
+        //     [0, -1, 0], // down
+        //     [0, 0, 1], // forward
+        //     [0, 0, -1], // backward
+        // ];
+        // for (const [dx, dy, dz] of directions) {
+        //     const nx = x + dx;
+        //     const ny = y + dy;
+        //     const nz = z + dz;
+        //     if (this.inBounds(nx, ny, nz)) {
+        //         if (this.getBlock(nx, ny, nz).id !== blocks.empty.id) {
+        //             return true;
+        //         }
+        //     }
+        // }
+        // return false;
     }
 }
