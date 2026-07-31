@@ -16,3 +16,27 @@ body {
     color: var(--primery-text-color);
     line-height: 1.5;
 }
+
+
+
+
+#info {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+
+    padding: 8px 12px;
+
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+
+    font-family: monospace;
+    font-size: 14px;
+
+    border-radius: 4px;
+    user-select: none;
+    pointer-events: none;
+
+    z-index: 1000;
+}
+

@@ -3,11 +3,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { World } from "./engine/world/world";
 import createUI from "./ui/ui";
+import { Player } from "./engine/entity/player/player";
 
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
-// Renderer
+// Renderer 
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -17,15 +19,15 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap
 document.body.appendChild(renderer.domElement);
 
 // Camera
-const camera = new THREE.PerspectiveCamera(
+const OcbitCamera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
     100
 );
-camera.position.set(10, 10, 10);
+OcbitCamera.position.set(10, 10, 10);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(OcbitCamera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.update();
 
@@ -35,7 +37,9 @@ const world = new World();
 world.generate();
 scene.add(world);
 
-camera.position.set(
+const player = new Player(scene)
+
+OcbitCamera.position.set(
     world.size.width * 0.75,
     world.size.height * 1.25,
     world.size.width * 0.75
@@ -86,20 +90,31 @@ function setupLight() {
 // }
 
 // Rendering loop
+let priviousTime = performance.now()
 function animate() {
+    let currentTime = performance.now()
+    const dt = (currentTime - priviousTime) / 1000; // seconds
+
+
     requestAnimationFrame(animate);
     controls.update(); // Required for damping or auto-rotation
-    renderer.render(scene, camera);
+    // renderer.render(scene, camera);
+    player.applyInputs(dt)
+    renderer.render(scene,player.controls.isLocked ? player.camera : OcbitCamera);
     stats.update();
+
+    priviousTime = currentTime
 }
 
 window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    OcbitCamera.aspect = window.innerWidth / window.innerHeight;
+    OcbitCamera.updateProjectionMatrix();
+    player.camera.aspect = window.innerWidth / window.innerHeight;
+    player.camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 setupLight();
 // setupWorld(8); // Reduced size so cubes fit nicely in view
-createUI(world);
+createUI(world, player);
 animate();
