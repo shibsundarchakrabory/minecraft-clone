@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
+import RNG from "./rng"
+import {blocks} from "../blocks/blocks.js";
+
 
 export class World extends THREE.Group {
     /**
@@ -14,6 +17,7 @@ export class World extends THREE.Group {
     // threshold = 0.5; // Threshold for block generation (0..1)
 
     parameters = {
+        seed:0,
         terrain: {
             scale: 30, // Scale of the noise
             magnitude: 0.5, // Magnitude of the noise
@@ -25,7 +29,7 @@ export class World extends THREE.Group {
         super();
         this.size = size;
         this.geometry = new THREE.BoxGeometry();
-        this.material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+        this.material = new THREE.MeshLambertMaterial();
     }
 
     generate() {
@@ -49,7 +53,7 @@ export class World extends THREE.Group {
                     // Loop through depth
                     row.push({
                         // Placeholder for block data
-                        id: 0,
+                        id: blocks.empty.id, // Default to empty block
                         instanceId: null,
                     });
                 }
@@ -60,7 +64,10 @@ export class World extends THREE.Group {
     }
 
     generateTerrain() {
+
+        const rng = new RNG(this.seed);
         const simplex = new SimplexNoise();
+
         for (let x = 0; x < this.size.width; x++) {
             for (let z = 0; z < this.size.width; z++) {
                 // Generate a height value using Simplex noise
@@ -80,8 +87,15 @@ export class World extends THREE.Group {
                     Math.min(this.size.height - 1, height)
                 ); // Clamp height to valid range
 
-                for (let y = 0; y <= height; y++) {
-                    this.setBlockId(x, y, z, 1); // Set block ID to 1 for solid
+                for (let y = 0; y <= this.size.height; y++) {
+                    if (y <= height) {
+                        this.setBlockId(x, y, z, blocks.dirt.id);
+                    } else if (y === height + 1) {
+                        this.setBlockId(x, y, z, blocks.grass.id);
+                    }else {
+                        this.setBlockId(x, y, z, blocks.empty.id);
+                    }
+
                 }
             }
         }
@@ -103,11 +117,13 @@ export class World extends THREE.Group {
             for (let y = 0; y < this.size.height; y++) {
                 for (let z = 0; z < this.size.width; z++) {
                     const blockId = this.getBlock(x, y, z).id;
+                    const blockType = Object.values(blocks).find(x => x.id === blockId);
                     const instanceId = mesh.count; // Get the current instance ID before incrementing
 
                     if (blockId !== 0) {
                         matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
                         mesh.setMatrixAt(instanceId, matrix);
+                        mesh.setColorAt(instanceId, new THREE.Color(blockType.color));
                         this.setBlockInstanceId(x, y, z, instanceId);
                         mesh.count++; // Increment the count only when a block is added
                     }
